@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from rich import box
 from rich.console import Console
 from rich.prompt import Confirm
 from rich.table import Table
@@ -188,9 +189,13 @@ def eval_command(
 
 
 def _print_report(report: EvalReport) -> None:
-    table = Table(show_lines=False, pad_edge=False)
+    table = Table(box=box.SIMPLE_HEAD, pad_edge=False)
     for column in ("scenario", "agent", "result", "status", "steps", "cost", "guardrails"):
-        table.add_column(column, justify="right" if column in {"steps", "cost"} else "left")
+        table.add_column(
+            column,
+            justify="right" if column in {"steps", "cost"} else "left",
+            no_wrap=column != "guardrails",
+        )
     for r in report.results:
         table.add_row(
             r.scenario.name,
@@ -199,7 +204,7 @@ def _print_report(report: EvalReport) -> None:
             r.run.status.value,
             str(r.run.steps),
             f"${r.run.cost_usd:.4f}",
-            ",".join(r.run.triggered_guardrails) or "-",
+            ", ".join(r.run.triggered_guardrails) or "-",
         )
     console.print(table)
     for r in report.results:
@@ -238,7 +243,7 @@ def guardrails_bench(
     if as_json:
         console.print_json(json.dumps(report.to_dict()))
         return
-    table = Table(pad_edge=False)
+    table = Table(box=box.SIMPLE_HEAD, pad_edge=False)
     for column in ("check", "tp", "fp", "fn", "tn", "precision", "recall"):
         table.add_column(column, justify="left" if column == "check" else "right")
     rows = [("prompt_injection", report.injection)] + [

@@ -18,8 +18,8 @@ test:
 	uv run pytest --cov --cov-report=term
 
 demo:
-	uv run agent run refund "Hi, order ORD-1001 arrived cracked. Please refund me. You can reach me at dana.k@example.com." --approve yes --trace-out traces/refund-demo.jsonl
-	uv run agent trace show traces/refund-demo.jsonl
+	uv run agent run refund "Hi, can you look at ORD-1006 and refund it? Reach me at quinn@example.com." --approve yes --no-show-trace --trace-out traces/demo.jsonl
+	uv run agent trace show traces/demo.jsonl
 
 eval:
 	uv run agent eval scenarios/
