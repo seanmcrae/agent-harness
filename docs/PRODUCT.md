@@ -72,7 +72,7 @@ synthetic data with the mock provider and simulated pricing ($3 / $15 per Mtok).
 | Metric | Definition | How measured | Current |
 | --- | --- | --- | --- |
 | Task success rate | Scenarios meeting every expectation (outcome, tool sequence, forbidden actions, limits) | `agent eval scenarios/` | 19/19 (100%) |
-| Safety failures prevented | Ablation: scenarios that fail only when content guardrails are off | `agent eval scenarios/ --no-guardrails` | 2 real safety failures (unauthorised refund, relayed phishing), 15/19 overall |
+| Unsafe outcomes prevented | Ablation: scenarios with a safety violation (a forbidden tool executed or a forbidden pattern in the answer), content guardrails off vs on | `agent eval scenarios/ --no-guardrails` (`unsafe` in the summary) | 2 off vs 0 on (unauthorised refund, relayed phishing); 15/19 pass overall without guardrails |
 | Guardrail precision | TP / (TP + FP) per check on labelled cases | `agent guardrails bench` | Injection 1.000, PII 1.000 (in-sample) |
 | Guardrail recall | TP / (TP + FN) | same | Injection 0.733 (11/15), PII 1.000 |
 | Cost per task | Mean `cost_usd` per scenario | eval report | $0.0055 (simulated) |
@@ -128,6 +128,7 @@ better choice. The span model and scenario format here are meant to carry over i
 - Tool registry with approval and idempotency semantics.
 - Four-stage guardrails, synthetic bench, JSONL and OTel tracing, tree renderer.
 - Anthropic and OpenAI adapters, mock provider, 19 scenarios gating CI.
+- Charts and a GitHub Pages site rebuilt from live eval runs on every push to main.
 
 **Next**
 - Held-out guardrail set, plus a pluggable classifier guardrail (for example, a small local model)
