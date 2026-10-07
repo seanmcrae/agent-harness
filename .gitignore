@@ -22,10 +22,11 @@ htmlcov/
 # Node (docs tooling)
 node_modules/
 
-# Run artifacts and downloaded data
-traces/
-reports/
-data/downloads/
+# Run artifacts, generated site, and downloaded data (anchored to the repo root)
+/traces/
+/reports/
+/site/
+/data/downloads/
 *.jsonl.tmp
 
 # Secrets

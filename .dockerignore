@@ -5,4 +5,6 @@
 .ruff_cache
 traces
 reports
+site
+docs
 **/__pycache__
