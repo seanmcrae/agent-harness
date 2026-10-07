@@ -1,0 +1,33 @@
+# Runtime behaviour under faults and tight budgets (mock provider, SYNTHETIC data).
+scenarios:
+  - name: transient_provider_errors_are_retried
+    agent: refund
+    input: "Refund ORD-1001, it arrived cracked."
+    provider_faults: 2
+    expect:
+      output: {status: refunded}
+
+  - name: provider_outage_fails_cleanly
+    agent: research
+    input: "What are the API rate limits per minute?"
+    provider_faults: 3
+    expect:
+      status: provider_error
+      tools: {max_calls: 0}
+
+  - name: step_budget_stops_the_run
+    agent: refund
+    input: "Refund ORD-1001, it arrived cracked."
+    budget: {max_steps: 2}
+    expect:
+      status: max_steps
+      forbidden_tools: [issue_refund]
+      guardrails_triggered: [budget]
+
+  - name: cost_budget_stops_the_run
+    agent: research
+    input: "What is the data retention period for raw events?"
+    budget: {max_cost_usd: 0.002}
+    expect:
+      status: budget_exceeded
+      guardrails_triggered: [budget]
