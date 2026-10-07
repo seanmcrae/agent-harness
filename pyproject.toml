@@ -54,6 +54,8 @@ ignore = ["PLR0911", "PLR0913", "PLR2004", "PLC0415"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["PLR2004"]
+# Typer derives CLI options from function parameters.
+"src/guarded_agent/cli.py" = ["PLR0917"]
 
 [tool.mypy]
 python_version = "3.11"
