@@ -1,0 +1,24 @@
+flowchart TD
+    U["User input"] --> GI{"Input guardrails<br/>PII redaction"}
+    GI -- block --> X["RunResult: blocked"]
+    GI --> L["Agent loop"]
+    L --> B{"Budget check<br/>steps, tokens, cost, time"}
+    B -- exceeded --> Y["RunResult: max_steps / budget_exceeded / timeout"]
+    B --> P["Provider.complete<br/>retry + backoff on transient errors"]
+    P --> M{"Tool calls?"}
+    M -- yes --> TC{"Tool-call guardrails<br/>allowlist"}
+    TC --> V["Validate args<br/>pydantic schema from type hints"]
+    V --> A{"Write tool?"}
+    A -- yes --> H["Approver hook"]
+    A -- no --> T["Run tool with timeout"]
+    H -- approved --> T
+    H -- denied --> R["Tool error to model"]
+    T --> GO{"Tool-output guardrails<br/>PII redaction, injection"}
+    GO --> L
+    R --> L
+    M -- no --> GF{"Output guardrails<br/>policy, citation grounding"}
+    GF --> S["Structured output<br/>validate, one repair attempt"]
+    S --> Z["RunResult + spans"]
+    Z --> E1["JSONL exporter"]
+    Z --> E2["OpenTelemetry exporter"]
+    Z --> EV["Scenario eval checks"]

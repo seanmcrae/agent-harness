@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
-        run: uv sync --extra dev --python ${{ matrix.python-version }}
+        run: uv sync --extra dev --extra docs --python ${{ matrix.python-version }}
       - name: Lint
         run: uv run ruff check .
       - name: Format check
@@ -29,3 +29,5 @@ jobs:
         run: uv run pytest --cov --cov-report=term
       - name: Scenario evals (mock provider)
         run: uv run agent eval scenarios/ --report-json reports/eval.json
+      - name: Build docs site
+        run: uv run python scripts/build_site.py --out site

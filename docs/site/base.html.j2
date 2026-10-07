@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}agent-harness{% endblock %}</title>
+  <meta name="description" content="A small runtime for multi-step, tool-using LLM agents with guardrails, budgets, approvals, tracing, and scenario evals.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="index.html">agent-harness</a>
+      <nav>
+        <a href="index.html#quickstart">Quickstart</a>
+        <a href="index.html#results">Results</a>
+        <a href="index.html#architecture">Architecture</a>
+        <a href="index.html#limitations">Limitations</a>
+        <a href="product.html"{% if page == "product.html" %} aria-current="page"{% endif %}>Product brief</a>
+        <a href="{{ repo_url }}">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+{% block content %}{% endblock %}
+  </main>
+  <footer class="wrap footer">
+    <p>agent-harness v{{ version }} &middot; MIT License &middot; Sean McRae &middot;
+      <a href="{{ repo_url }}">source</a> &middot;
+      <a href="results.json">raw results (JSON)</a></p>
+    <p>All numbers and traces on this site were produced by <code>make site</code> on the bundled
+      synthetic data with the offline mock provider.</p>
+  </footer>
+</body>
+</html>
