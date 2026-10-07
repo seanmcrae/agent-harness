@@ -86,6 +86,32 @@ def readme_sections(readme: str, wanted: tuple[str, ...]) -> dict[str, str]:
     return sections
 
 
+_LIST_ITEM = re.compile(r"^\s*(?:[-*+]|\d+\.)\s")
+
+
+def _separate_lists(text: str) -> str:
+    """Insert the blank line Python-Markdown needs before a list that follows a paragraph.
+
+    GitHub renders "**In:**" directly followed by "- item" as a list; Python-Markdown does not.
+    """
+    lines: list[str] = []
+    in_fence = False
+    for line in text.splitlines():
+        if line.startswith("```"):
+            in_fence = not in_fence
+        previous = lines[-1] if lines else ""
+        if (
+            not in_fence
+            and _LIST_ITEM.match(line)
+            and previous.strip()
+            and not _LIST_ITEM.match(previous)
+            and not previous.startswith((" ", "\t"))
+        ):
+            lines.append("")
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def render_markdown(text: str) -> str:
     """Render Markdown, swapping the Mermaid fence for the pre-rendered SVG and fixing links."""
     diagrams: list[str] = []
@@ -95,7 +121,8 @@ def render_markdown(text: str) -> str:
         return f"\n\nMERMAID-{len(diagrams) - 1}\n\n"
 
     body = markdown.markdown(
-        _MERMAID_BLOCK.sub(stash, text), extensions=["tables", "fenced_code", "sane_lists"]
+        _separate_lists(_MERMAID_BLOCK.sub(stash, text)),
+        extensions=["tables", "fenced_code", "sane_lists"],
     )
     for i, source in enumerate(diagrams):
         if source.strip() != DIAGRAM_SOURCE.read_text(encoding="utf-8").strip():

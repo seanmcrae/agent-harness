@@ -57,6 +57,12 @@ def test_local_references_resolve_and_no_remote_assets(site: Path) -> None:
     assert "flowchart TD" in index
 
 
+def test_product_brief_lists_render_as_lists(site: Path) -> None:
+    product = (site / "product.html").read_text()
+    assert "<p><strong>In:</strong></p>\n<ul>" in product
+    assert "<h2>Roadmap</h2>" in product
+
+
 def test_readme_diagram_matches_the_rendered_source() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
     block = re.search(r"```mermaid\n(.*?)```", readme, re.DOTALL)
