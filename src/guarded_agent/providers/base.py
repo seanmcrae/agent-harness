@@ -14,7 +14,8 @@ class CompletionRequest:
     messages: tuple[Message, ...]
     tools: tuple[ToolSpec, ...] = ()
     max_tokens: int = 1024
-    temperature: float = 0.0
+    temperature: float | None = None
+    """None leaves the vendor default; some models reject an explicit temperature."""
 
 
 @dataclass(frozen=True)
