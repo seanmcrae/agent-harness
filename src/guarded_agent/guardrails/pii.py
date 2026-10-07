@@ -38,7 +38,8 @@ class PIIRedactor(Guardrail):
     """Replace PII with typed placeholders.
 
     Card candidates are only redacted when they pass the Luhn checksum, which keeps order numbers
-    and tracking ids readable. Phone candidates need 10-15 digits and must not contain an ISO date.
+    and tracking ids readable. Phone candidates need 10-15 digits, must not contain an ISO date,
+    and, when written as a bare digit run, must have a North American length.
     """
 
     emails: bool = True
@@ -87,5 +88,10 @@ def _substitute(
 
 
 def _looks_like_phone(candidate: str) -> bool:
-    count = len(_digits(candidate))
-    return PHONE_MIN_DIGITS <= count <= PHONE_MAX_DIGITS and not ISO_DATE_RE.search(candidate)
+    digits = _digits(candidate)
+    if ISO_DATE_RE.search(candidate) or not PHONE_MIN_DIGITS <= len(digits) <= PHONE_MAX_DIGITS:
+        return False
+    if candidate.isdigit():
+        # A bare digit run is far more often an id than a phone; accept only NANP lengths.
+        return len(digits) == 10 or (len(digits) == 11 and digits.startswith("1"))
+    return True
