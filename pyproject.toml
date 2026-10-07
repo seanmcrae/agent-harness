@@ -24,14 +24,27 @@ dependencies = [
 anthropic = ["anthropic>=0.40"]
 openai = ["openai>=1.66"]
 otel = ["opentelemetry-sdk>=1.25"]
+# Charts and the static documentation site (make charts / make site).
+docs = [
+    "matplotlib>=3.8",
+    "jinja2>=3.1",
+    "markdown>=3.5",
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "ruff>=0.6",
     "mypy>=1.11",
     "types-PyYAML>=6.0",
+    "types-Markdown>=3.5",
     "opentelemetry-sdk>=1.25",
 ]
+
+[project.urls]
+Homepage = "https://seanmcrae.github.io/agent-harness/"
+Documentation = "https://seanmcrae.github.io/agent-harness/"
+Repository = "https://github.com/seanmcrae/agent-harness"
+Changelog = "https://github.com/seanmcrae/agent-harness/blob/main/CHANGELOG.md"
 
 [project.scripts]
 agent = "agent_harness.cli:app"
@@ -60,7 +73,7 @@ ignore = ["PLR0911", "PLR0913", "PLR2004", "PLC0415"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
-files = ["src", "tests"]
+files = ["src", "tests", "scripts"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]

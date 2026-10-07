@@ -1,7 +1,7 @@
-.PHONY: install lint format typecheck test cov demo eval bench check
+.PHONY: install lint format typecheck test cov demo eval bench charts check
 
 install:
-	uv sync --extra dev
+	uv sync --extra dev --extra docs
 
 lint:
 	uv run ruff check .
@@ -26,5 +26,9 @@ eval:
 
 bench:
 	uv run agent guardrails bench
+
+# Re-render docs/img from fresh eval and bench runs on the bundled synthetic data.
+charts:
+	uv run --extra docs python scripts/render_charts.py docs/img
 
 check: lint typecheck test eval
