@@ -74,3 +74,17 @@ def test_guardrail_bench_and_agent_listing(runner: CliRunner) -> None:
     assert json.loads(bench.output)["cases"] == 48
     listing = runner.invoke(app, ["agents"])
     assert "issue_refund*" in listing.output
+
+
+def test_module_entry_point() -> None:
+    import subprocess
+    import sys
+
+    completed = subprocess.run(
+        [sys.executable, "-m", "agent_harness", "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert completed.returncode == 0
+    assert "scenario evals" in completed.stdout

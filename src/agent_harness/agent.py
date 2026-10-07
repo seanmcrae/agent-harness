@@ -376,15 +376,12 @@ class _Run:
 
     def _invoke(self, tool: Tool, args: BaseModel) -> Any:
         """Run a tool within the remaining wall-clock budget; retry one timeout if idempotent."""
-        attempts = 2 if tool.idempotent else 1
-        for attempt in range(1, attempts + 1):
-            remaining = self.tracker.remaining_s()
-            try:
-                return tool.invoke(args, timeout_s=remaining)
-            except ToolTimeoutError:
-                if attempt == attempts:
-                    raise
-        raise AssertionError("unreachable")
+        try:
+            return tool.invoke(args, timeout_s=self.tracker.remaining_s())
+        except ToolTimeoutError:
+            if not tool.idempotent:
+                raise
+        return tool.invoke(args, timeout_s=self.tracker.remaining_s())
 
     # Final answer -------------------------------------------------------------------------
 
