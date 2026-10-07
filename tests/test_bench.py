@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from guarded_agent.guardrails.bench import Confusion, load_cases, run_bench
+from agent_harness.guardrails.bench import Confusion, load_cases, run_bench
 
 
 def test_confusion_metrics() -> None:

@@ -5,7 +5,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from guarded_agent.types import Message, ModelPricing, ToolSpec, Usage
+from agent_harness.types import Message, ModelPricing, ToolSpec, Usage
 
 
 @dataclass(frozen=True)

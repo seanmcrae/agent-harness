@@ -13,7 +13,7 @@ from typing import Any, get_type_hints, overload
 
 from pydantic import BaseModel, ConfigDict, ValidationError, create_model
 
-from guarded_agent.types import ToolSpec
+from agent_harness.types import ToolSpec
 
 
 class SideEffect(StrEnum):

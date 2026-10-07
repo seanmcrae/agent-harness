@@ -9,14 +9,14 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from typing import Any
 
-from guarded_agent.providers.base import (
+from agent_harness.providers.base import (
     CompletionRequest,
     CompletionResponse,
     Provider,
     ProviderError,
 )
-from guarded_agent.providers.pricing import SIMULATED_PRICING
-from guarded_agent.types import Message, ModelPricing, ToolCall, Usage
+from agent_harness.providers.pricing import SIMULATED_PRICING
+from agent_harness.types import Message, ModelPricing, ToolCall, Usage
 
 
 @dataclass(frozen=True)

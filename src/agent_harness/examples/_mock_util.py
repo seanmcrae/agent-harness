@@ -5,8 +5,8 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from guarded_agent.providers import CompletionRequest
-from guarded_agent.types import Message
+from agent_harness.providers import CompletionRequest
+from agent_harness.types import Message
 
 
 def first_user_text(request: CompletionRequest) -> str:

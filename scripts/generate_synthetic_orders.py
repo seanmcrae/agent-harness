@@ -17,7 +17,7 @@ from typing import Any
 
 SEED = 20260930
 AS_OF = date(2026, 9, 30)
-OUT = Path(__file__).resolve().parents[1] / "src/guarded_agent/examples/data/synthetic_orders.json"
+OUT = Path(__file__).resolve().parents[1] / "src/agent_harness/examples/data/synthetic_orders.json"
 
 FIRST = ["Avery", "Jordan", "Riley", "Morgan", "Casey", "Quinn", "Rowan", "Emerson", "Hayden"]
 LAST = ["Okafor", "Lindqvist", "Tanaka", "Moreau", "Castillo", "Novak", "Haddad", "Brennan"]

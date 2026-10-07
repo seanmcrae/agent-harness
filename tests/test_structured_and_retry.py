@@ -2,8 +2,8 @@ import random
 
 import pytest
 
-from guarded_agent.retry import RetryPolicy
-from guarded_agent.structured import StructuredOutputError, extract_json, parse_structured
+from agent_harness.retry import RetryPolicy
+from agent_harness.structured import StructuredOutputError, extract_json, parse_structured
 from tests.conftest import Answer
 
 

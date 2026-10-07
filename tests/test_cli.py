@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from typer.testing import CliRunner
 
-from guarded_agent.cli import app
+from agent_harness.cli import app
 
 SCENARIOS = Path(__file__).resolve().parents[1] / "scenarios"
 

@@ -1,6 +1,6 @@
 """Guardrails: typed allow / redact / block decisions at each stage of a run."""
 
-from guarded_agent.guardrails.base import (
+from agent_harness.guardrails.base import (
     Action,
     Decision,
     Guardrail,
@@ -9,9 +9,9 @@ from guarded_agent.guardrails.base import (
     GuardrailSet,
     Stage,
 )
-from guarded_agent.guardrails.injection import InjectionDetector
-from guarded_agent.guardrails.pii import PIIRedactor, luhn_valid
-from guarded_agent.guardrails.policy import OutputPolicy, ToolAllowlist
+from agent_harness.guardrails.injection import InjectionDetector
+from agent_harness.guardrails.pii import PIIRedactor, luhn_valid
+from agent_harness.guardrails.policy import OutputPolicy, ToolAllowlist
 
 
 def default_guardrails() -> GuardrailSet:

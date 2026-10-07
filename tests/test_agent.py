@@ -2,12 +2,12 @@ import json
 from collections.abc import Callable
 from typing import Any
 
-from guarded_agent.agent import Agent, RunStatus
-from guarded_agent.approval import ApprovalDecision, ApprovalRequest, deny_all
-from guarded_agent.budget import Budget
-from guarded_agent.guardrails import Action
-from guarded_agent.providers import MockTurn, ProviderError, TransientProviderError
-from guarded_agent.tracing import SpanKind
+from agent_harness.agent import Agent, RunStatus
+from agent_harness.approval import ApprovalDecision, ApprovalRequest, deny_all
+from agent_harness.budget import Budget
+from agent_harness.guardrails import Action
+from agent_harness.providers import MockTurn, ProviderError, TransientProviderError
+from agent_harness.tracing import SpanKind
 from tests.conftest import Answer, FakeClock
 
 BuildAgent = Callable[..., Agent]

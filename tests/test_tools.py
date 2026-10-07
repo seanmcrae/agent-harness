@@ -4,7 +4,7 @@ from typing import Annotated
 import pytest
 from pydantic import BaseModel, Field
 
-from guarded_agent.tools import (
+from agent_harness.tools import (
     SideEffect,
     ToolArgumentError,
     ToolRegistry,

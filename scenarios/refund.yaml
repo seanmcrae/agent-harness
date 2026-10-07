@@ -1,4 +1,4 @@
-# Refund agent scenarios over the SYNTHETIC order database (src/guarded_agent/examples/data).
+# Refund agent scenarios over the SYNTHETIC order database (src/agent_harness/examples/data).
 scenarios:
   - name: refund_eligible_damaged_item
     agent: refund

@@ -5,21 +5,21 @@ from typing import Any
 
 import pytest
 
-from guarded_agent.providers import (
+from agent_harness.providers import (
     CompletionRequest,
     ProviderError,
     TransientProviderError,
     create_provider,
 )
-from guarded_agent.providers.anthropic import AnthropicProvider, to_anthropic_messages
-from guarded_agent.providers.openai import (
+from agent_harness.providers.anthropic import AnthropicProvider, to_anthropic_messages
+from agent_harness.providers.openai import (
     OpenAIChatProvider,
     OpenAIResponsesProvider,
     parse_arguments,
     to_chat_messages,
     to_responses_input,
 )
-from guarded_agent.types import Message, ToolCall, ToolSpec
+from agent_harness.types import Message, ToolCall, ToolSpec
 
 TOOL = ToolSpec("lookup", "Look up an order.", {"type": "object", "properties": {}})
 CONVERSATION = (

@@ -6,7 +6,7 @@ import re
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field
 
-from guarded_agent.guardrails.base import Decision, Guardrail, GuardrailContext, Stage
+from agent_harness.guardrails.base import Decision, Guardrail, GuardrailContext, Stage
 
 
 @dataclass

@@ -12,9 +12,9 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from guarded_agent.approval import ApprovalRequest, Approver, deny_all
-from guarded_agent.budget import Budget, BudgetTracker
-from guarded_agent.guardrails import (
+from agent_harness.approval import ApprovalRequest, Approver, deny_all
+from agent_harness.budget import Budget, BudgetTracker
+from agent_harness.guardrails import (
     Action,
     Decision,
     GuardrailContext,
@@ -24,23 +24,23 @@ from guarded_agent.guardrails import (
     ToolAllowlist,
     default_guardrails,
 )
-from guarded_agent.providers.base import (
+from agent_harness.providers.base import (
     CompletionRequest,
     CompletionResponse,
     Provider,
     ProviderError,
     TransientProviderError,
 )
-from guarded_agent.retry import RetryPolicy
-from guarded_agent.structured import (
+from agent_harness.retry import RetryPolicy
+from agent_harness.structured import (
     StructuredOutputError,
     output_instructions,
     parse_structured,
     repair_prompt,
 )
-from guarded_agent.tools import Tool, ToolError, ToolRegistry, ToolTimeoutError, serialize_result
-from guarded_agent.tracing import Span, SpanExporter, SpanKind, Tracer
-from guarded_agent.types import Message, ToolCall, ToolCallRecord, ToolCallStatus, Usage
+from agent_harness.tools import Tool, ToolError, ToolRegistry, ToolTimeoutError, serialize_result
+from agent_harness.tracing import Span, SpanExporter, SpanKind, Tracer
+from agent_harness.types import Message, ToolCall, ToolCallRecord, ToolCallStatus, Usage
 
 
 class RunStatus(StrEnum):

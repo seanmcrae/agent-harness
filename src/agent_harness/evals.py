@@ -14,12 +14,12 @@ from typing import Any, Literal
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
 
-from guarded_agent.agent import Agent, RunResult, RunStatus
-from guarded_agent.approval import approve_all, deny_all
-from guarded_agent.examples import ExampleAgent, get_example
-from guarded_agent.guardrails import GuardrailSet
-from guarded_agent.providers import MockProvider, Provider, TransientProviderError
-from guarded_agent.tracing import SpanExporter
+from agent_harness.agent import Agent, RunResult, RunStatus
+from agent_harness.approval import approve_all, deny_all
+from agent_harness.examples import ExampleAgent, get_example
+from agent_harness.guardrails import GuardrailSet
+from agent_harness.providers import MockProvider, Provider, TransientProviderError
+from agent_harness.tracing import SpanExporter
 
 
 class _Strict(BaseModel):

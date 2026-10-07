@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from guarded_agent.agent import AgentSpec
-from guarded_agent.providers import Policy
+from agent_harness.agent import AgentSpec
+from agent_harness.providers import Policy
 
 from .refund import build_refund_spec, refund_policy
 from .research import build_research_spec, research_policy

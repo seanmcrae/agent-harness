@@ -8,7 +8,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
 
-from guarded_agent.types import ToolCallRecord
+from agent_harness.types import ToolCallRecord
 
 
 class Action(StrEnum):

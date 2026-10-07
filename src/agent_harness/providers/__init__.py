@@ -1,13 +1,13 @@
 """Model providers: a common interface, real API adapters, and a deterministic mock."""
 
-from guarded_agent.providers.base import (
+from agent_harness.providers.base import (
     CompletionRequest,
     CompletionResponse,
     Provider,
     ProviderError,
     TransientProviderError,
 )
-from guarded_agent.providers.mock import MockProvider, MockTurn, Policy
+from agent_harness.providers.mock import MockProvider, MockTurn, Policy
 
 __all__ = [
     "PROVIDER_NAMES",
@@ -35,14 +35,14 @@ def create_provider(
             raise ValueError("the mock provider needs a policy")
         return MockProvider(policy=policy)
     if name == "anthropic":
-        from guarded_agent.providers.anthropic import DEFAULT_MODEL, AnthropicProvider
+        from agent_harness.providers.anthropic import DEFAULT_MODEL, AnthropicProvider
 
         return AnthropicProvider(model or DEFAULT_MODEL)
     if name in ("openai", "openai-responses"):
-        from guarded_agent.providers.openai import (
+        from agent_harness.providers.openai import (
             DEFAULT_MODEL as OPENAI_DEFAULT,
         )
-        from guarded_agent.providers.openai import (
+        from agent_harness.providers.openai import (
             OpenAIChatProvider,
             OpenAIResponsesProvider,
         )

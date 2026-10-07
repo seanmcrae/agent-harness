@@ -7,7 +7,7 @@ from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any, Protocol
 
-from guarded_agent.tracing.spans import Span
+from agent_harness.tracing.spans import Span
 
 
 class SpanExporter(Protocol):
@@ -45,7 +45,7 @@ class OpenTelemetryExporter:
         from opentelemetry import trace
 
         self._trace = trace
-        self._tracer = tracer or trace.get_tracer("guarded_agent")
+        self._tracer = tracer or trace.get_tracer("agent_harness")
 
     def export(self, spans: Sequence[Span]) -> None:
         otel_spans: dict[str, Any] = {}
@@ -66,9 +66,9 @@ class OpenTelemetryExporter:
 
 
 def _otel_attributes(span: Span) -> Iterable[tuple[str, Any]]:
-    yield "guarded_agent.kind", span.kind.value
+    yield "agent_harness.kind", span.kind.value
     for key, value in span.attributes.items():
         if isinstance(value, str | bool | int | float):
-            yield f"guarded_agent.{key}", value
+            yield f"agent_harness.{key}", value
         elif value is not None:
-            yield f"guarded_agent.{key}", json.dumps(value, default=str)
+            yield f"agent_harness.{key}", json.dumps(value, default=str)

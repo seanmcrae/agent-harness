@@ -6,8 +6,8 @@ import time
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from guarded_agent.guardrails.base import Action, Decision, Stage
-from guarded_agent.types import Usage
+from agent_harness.guardrails.base import Action, Decision, Stage
+from agent_harness.types import Usage
 
 BUDGET_GUARDRAIL = "budget"
 

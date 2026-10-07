@@ -10,7 +10,7 @@ from typing import Any
 from rich.markup import escape
 from rich.tree import Tree
 
-from guarded_agent.tracing.spans import Span, SpanKind
+from agent_harness.tracing.spans import Span, SpanKind
 
 _ACTION_STYLE = {"allow": "dim", "redact": "yellow", "block": "bold red"}
 _OUTCOME_STYLE = {"ok": "green", "denied": "yellow"}

@@ -13,8 +13,8 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
-from guarded_agent.guardrails.injection import InjectionDetector
-from guarded_agent.guardrails.pii import PIIRedactor
+from agent_harness.guardrails.injection import InjectionDetector
+from agent_harness.guardrails.pii import PIIRedactor
 
 PII_TYPES = ("email", "phone", "card")
 
@@ -80,7 +80,7 @@ class BenchReport:
 
 def load_cases(path: str | Path | None = None) -> list[Case]:
     if path is None:
-        source = resources.files("guarded_agent.examples").joinpath(
+        source = resources.files("agent_harness.examples").joinpath(
             "data/synthetic_guardrail_cases.jsonl"
         )
         lines = source.read_text(encoding="utf-8").splitlines()

@@ -6,7 +6,7 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from guarded_agent.guardrails.base import Decision, Guardrail, GuardrailContext, Stage
+from agent_harness.guardrails.base import Decision, Guardrail, GuardrailContext, Stage
 
 EMAIL_RE = re.compile(
     r"(?<![\w.+-])[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}"

@@ -3,15 +3,15 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from guarded_agent.agent import RunStatus
-from guarded_agent.evals import (
+from agent_harness.agent import RunStatus
+from agent_harness.evals import (
     Scenario,
     check,
     load_scenarios,
     run_scenario,
     run_suite,
 )
-from guarded_agent.tracing import JsonlExporter, SpanKind, load_spans
+from agent_harness.tracing import JsonlExporter, SpanKind, load_spans
 
 SCENARIOS = Path(__file__).resolve().parents[1] / "scenarios"
 

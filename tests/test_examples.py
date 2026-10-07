@@ -2,19 +2,19 @@
 
 import pytest
 
-from guarded_agent.agent import Agent, RunResult, RunStatus
-from guarded_agent.approval import approve_all, deny_all
-from guarded_agent.examples import EXAMPLES, get_example
-from guarded_agent.examples.refund import OrderStore, RefundOutcome
-from guarded_agent.examples.research import (
+from agent_harness.agent import Agent, RunResult, RunStatus
+from agent_harness.approval import approve_all, deny_all
+from agent_harness.examples import EXAMPLES, get_example
+from agent_harness.examples.refund import OrderStore, RefundOutcome
+from agent_harness.examples.research import (
     CitationGrounding,
     DocStore,
     ResearchAnswer,
     research_guardrails,
 )
-from guarded_agent.guardrails import GuardrailContext, GuardrailSet, InjectionDetector, Stage
-from guarded_agent.providers import MockProvider
-from guarded_agent.types import ToolCallRecord
+from agent_harness.guardrails import GuardrailContext, GuardrailSet, InjectionDetector, Stage
+from agent_harness.providers import MockProvider
+from agent_harness.types import ToolCallRecord
 
 
 def run(agent_name: str, text: str, *, guardrails: bool = True, approve: bool = True) -> RunResult:

@@ -16,11 +16,11 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field
 
-from guarded_agent.agent import AgentSpec
-from guarded_agent.budget import Budget
-from guarded_agent.guardrails import GuardrailSet, default_guardrails
-from guarded_agent.providers import CompletionRequest, MockTurn
-from guarded_agent.tools import SideEffect, ToolError, ToolRegistry, tool
+from agent_harness.agent import AgentSpec
+from agent_harness.budget import Budget
+from agent_harness.guardrails import GuardrailSet, default_guardrails
+from agent_harness.providers import CompletionRequest, MockTurn
+from agent_harness.tools import SideEffect, ToolError, ToolRegistry, tool
 
 from ._mock_util import first_user_text, json_or_none, trailing_tool_messages
 
@@ -67,7 +67,7 @@ class OrderStore:
 
     @classmethod
     def load_synthetic(cls) -> OrderStore:
-        raw = resources.files("guarded_agent.examples").joinpath("data/synthetic_orders.json")
+        raw = resources.files("agent_harness.examples").joinpath("data/synthetic_orders.json")
         data = json.loads(raw.read_text(encoding="utf-8"))
         orders = [Order.model_validate(o) for o in data["orders"]]
         return cls({o.order_id: o for o in orders}, date.fromisoformat(data["as_of"]))

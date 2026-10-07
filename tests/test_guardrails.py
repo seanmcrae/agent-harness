@@ -1,6 +1,6 @@
 import pytest
 
-from guarded_agent.guardrails import (
+from agent_harness.guardrails import (
     Action,
     GuardrailContext,
     GuardrailSet,

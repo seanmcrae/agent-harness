@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from guarded_agent.guardrails.base import Decision, Guardrail, GuardrailContext, Stage
+from agent_harness.guardrails.base import Decision, Guardrail, GuardrailContext, Stage
 
 
 @dataclass(frozen=True)

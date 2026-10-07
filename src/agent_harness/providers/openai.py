@@ -1,4 +1,4 @@
-"""OpenAI adapters for Chat Completions and the Responses API (``guarded-agent[openai]``)."""
+"""OpenAI adapters for Chat Completions and the Responses API (``agent-harness[openai]``)."""
 
 from __future__ import annotations
 
@@ -6,15 +6,15 @@ import json
 import os
 from typing import Any
 
-from guarded_agent.providers.base import (
+from agent_harness.providers.base import (
     CompletionRequest,
     CompletionResponse,
     Provider,
     ProviderError,
     classify_sdk_error,
 )
-from guarded_agent.providers.pricing import pricing_for
-from guarded_agent.types import Message, ModelPricing, ToolCall, ToolSpec, Usage
+from agent_harness.providers.pricing import pricing_for
+from agent_harness.types import Message, ModelPricing, ToolCall, ToolSpec, Usage
 
 DEFAULT_MODEL = "gpt-4.1-mini"
 

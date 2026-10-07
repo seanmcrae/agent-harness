@@ -3,11 +3,11 @@ from typing import Annotated, Literal
 import pytest
 from pydantic import BaseModel, Field
 
-from guarded_agent.agent import Agent, AgentSpec
-from guarded_agent.approval import Approver, approve_all
-from guarded_agent.budget import Budget
-from guarded_agent.providers import MockProvider, MockTurn
-from guarded_agent.tools import SideEffect, ToolError, ToolRegistry, tool
+from agent_harness.agent import Agent, AgentSpec
+from agent_harness.approval import Approver, approve_all
+from agent_harness.budget import Budget
+from agent_harness.providers import MockProvider, MockTurn
+from agent_harness.tools import SideEffect, ToolError, ToolRegistry, tool
 
 
 class Answer(BaseModel):

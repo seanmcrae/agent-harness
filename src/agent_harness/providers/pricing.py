@@ -4,7 +4,7 @@ Vendor prices change; pass ``pricing=`` to a provider to override. Mock pricing 
 that budgets and cost reports exercise real arithmetic in offline runs.
 """
 
-from guarded_agent.types import ModelPricing
+from agent_harness.types import ModelPricing
 
 SIMULATED_PRICING = ModelPricing(input_per_mtok=3.0, output_per_mtok=15.0)
 

@@ -1,15 +1,15 @@
 import pytest
 
-from guarded_agent.providers import (
+from agent_harness.providers import (
     CompletionRequest,
     MockProvider,
     MockTurn,
     ProviderError,
     TransientProviderError,
 )
-from guarded_agent.providers.base import classify_sdk_error
-from guarded_agent.providers.pricing import SIMULATED_PRICING, UNKNOWN_PRICING, pricing_for
-from guarded_agent.types import Message, ModelPricing, Usage
+from agent_harness.providers.base import classify_sdk_error
+from agent_harness.providers.pricing import SIMULATED_PRICING, UNKNOWN_PRICING, pricing_for
+from agent_harness.types import Message, ModelPricing, Usage
 
 
 def _request(text: str = "hello") -> CompletionRequest:

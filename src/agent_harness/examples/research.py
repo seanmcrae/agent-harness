@@ -16,9 +16,9 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, Field
 
-from guarded_agent.agent import AgentSpec
-from guarded_agent.budget import Budget
-from guarded_agent.guardrails import (
+from agent_harness.agent import AgentSpec
+from agent_harness.budget import Budget
+from agent_harness.guardrails import (
     Decision,
     Guardrail,
     GuardrailContext,
@@ -28,9 +28,9 @@ from guarded_agent.guardrails import (
     PIIRedactor,
     Stage,
 )
-from guarded_agent.providers import CompletionRequest, MockTurn
-from guarded_agent.structured import StructuredOutputError, extract_json
-from guarded_agent.tools import ToolError, ToolRegistry, tool
+from agent_harness.providers import CompletionRequest, MockTurn
+from agent_harness.structured import StructuredOutputError, extract_json
+from agent_harness.tools import ToolError, ToolRegistry, tool
 
 from ._mock_util import first_user_text, json_or_none, trailing_tool_messages
 
@@ -83,7 +83,7 @@ class DocStore:
 
     @classmethod
     def load_synthetic(cls) -> DocStore:
-        root = resources.files("guarded_agent.examples").joinpath("data/synthetic_kb")
+        root = resources.files("agent_harness.examples").joinpath("data/synthetic_kb")
         docs = {}
         for entry in sorted(root.iterdir(), key=lambda e: e.name):
             if not entry.name.startswith("kb-"):

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from rich.console import Console
 
-from guarded_agent.tracing import (
+from agent_harness.tracing import (
     JsonlExporter,
     OpenTelemetryExporter,
     SpanKind,
@@ -100,4 +100,4 @@ def test_opentelemetry_export_preserves_hierarchy() -> None:
     run, step = finished["run refund"], finished["step step 1"]
     assert step.parent is not None
     assert step.parent.span_id == run.context.span_id
-    assert finished["tool_call lookup"].attributes["guarded_agent.arguments"] == '{"id": 1}'
+    assert finished["tool_call lookup"].attributes["agent_harness.arguments"] == '{"id": 1}'

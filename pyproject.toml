@@ -1,5 +1,5 @@
 [project]
-name = "guarded-agent"
+name = "agent-harness"
 version = "0.1.0"
 description = "A small runtime for multi-step tool-using LLM agents with guardrails, budgets, tracing, and scenario evals."
 readme = "README.md"
@@ -34,14 +34,14 @@ dev = [
 ]
 
 [project.scripts]
-agent = "guarded_agent.cli:app"
+agent = "agent_harness.cli:app"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/guarded_agent"]
+packages = ["src/agent_harness"]
 
 [tool.ruff]
 line-length = 100
@@ -55,7 +55,7 @@ ignore = ["PLR0911", "PLR0913", "PLR2004", "PLC0415"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["PLR2004"]
 # Typer derives CLI options from function parameters.
-"src/guarded_agent/cli.py" = ["PLR0917"]
+"src/agent_harness/cli.py" = ["PLR0917"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -72,7 +72,7 @@ testpaths = ["tests"]
 addopts = "-q --strict-markers"
 
 [tool.coverage.run]
-source = ["guarded_agent"]
+source = ["agent_harness"]
 branch = true
 
 [tool.coverage.report]

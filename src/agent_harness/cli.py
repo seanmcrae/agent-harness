@@ -16,25 +16,25 @@ from rich.console import Console
 from rich.prompt import Confirm
 from rich.table import Table
 
-from guarded_agent.agent import Agent, RunResult
-from guarded_agent.approval import (
+from agent_harness.agent import Agent, RunResult
+from agent_harness.approval import (
     ApprovalDecision,
     ApprovalRequest,
     Approver,
     approve_all,
     deny_all,
 )
-from guarded_agent.evals import (
+from agent_harness.evals import (
     EvalReport,
     Scenario,
     load_scenarios,
     mock_provider_factory,
     run_suite,
 )
-from guarded_agent.examples import EXAMPLES, ExampleAgent, get_example
-from guarded_agent.guardrails.bench import load_cases, run_bench
-from guarded_agent.providers import PROVIDER_NAMES, Provider, ProviderError, create_provider
-from guarded_agent.tracing import JsonlExporter, SpanExporter, load_spans, render_trace
+from agent_harness.examples import EXAMPLES, ExampleAgent, get_example
+from agent_harness.guardrails.bench import load_cases, run_bench
+from agent_harness.providers import PROVIDER_NAMES, Provider, ProviderError, create_provider
+from agent_harness.tracing import JsonlExporter, SpanExporter, load_spans, render_trace
 
 app = typer.Typer(
     add_completion=False,
