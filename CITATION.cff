@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using these metadata."
+title: "agent-harness: guardrails, budgets, approvals, tracing, and scenario evals for tool-using LLM agents"
+abstract: >-
+  A small Python runtime for multi-step, tool-using LLM agents. Runs are bounded by step, token,
+  cost, and time budgets; untrusted text passes through typed guardrails; write tools require
+  approval; every run produces a span tree; and YAML scenarios gate behaviour in CI.
+type: software
+authors:
+  - given-names: Sean
+    family-names: McRae
+version: 0.1.0
+date-released: "2026-10-07"
+license: MIT
+repository-code: "https://github.com/seanmcrae/agent-harness"
+url: "https://seanmcrae.github.io/agent-harness/"
+keywords:
+  - llm-agents
+  - guardrails
+  - prompt-injection
+  - evaluation
+  - observability
