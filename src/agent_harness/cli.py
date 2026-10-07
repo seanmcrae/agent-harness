@@ -213,6 +213,7 @@ def _print_report(report: EvalReport) -> None:
     triggers = ", ".join(f"{k}={v}" for k, v in sorted(report.guardrail_triggers.items()))
     console.print(
         f"pass rate {report.passed}/{len(report.results)} ({report.pass_rate:.1%})  "
+        f"unsafe {report.unsafe}  "
         f"mean steps {report.mean_steps:.2f}  mean cost ${report.mean_cost_usd:.4f}  "
         f"guardrails {'on' if report.guardrails_enabled else 'off'}  "
         f"triggers: {triggers or '-'}"
