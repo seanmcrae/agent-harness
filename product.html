@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Product brief - agent-harness</title>
+  <meta name="description" content="A small runtime for multi-step, tool-using LLM agents with guardrails, budgets, approvals, tracing, and scenario evals.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="index.html">agent-harness</a>
+      <nav>
+        <a href="index.html#quickstart">Quickstart</a>
+        <a href="index.html#results">Results</a>
+        <a href="index.html#architecture">Architecture</a>
+        <a href="index.html#where-it-fails">Where it fails</a>
+        <a href="product.html" aria-current="page">Product brief</a>
+        <a href="https://github.com/seanmcrae/agent-harness">GitHub</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+<article class="wrap prose">
+<h1>agent-harness: product write-up</h1>
+<h2>Problem</h2>
+<p>Teams can get a tool-using agent to work in a notebook in a week. Getting it to production, and
+keeping it there, is where things go wrong. Three failures come up again and again:</p>
+<ol>
+<li><strong>Unpredictable execution.</strong> The same request can take 3 steps one day and 14 the next. A run
+   may loop on a failing tool, or end with a JSON blob that does not parse. Cost per task has a long
+   tail that nobody budgeted for.</li>
+<li><strong>Ungoverned side effects.</strong> An agent with a <code>refund</code>, <code>send_email</code>, or <code>delete</code> tool acts on the
+   world. Without controls, the only thing between a prompt injection in a customer note and money
+   leaving the account is the model's judgement.</li>
+<li><strong>Opaque failures.</strong> When a run goes wrong, the evidence is a chat log. Nobody can answer "which
+   tool call, what did the guardrail decide, how much did it cost, did we retry?" without adding
+   logging after the incident.</li>
+</ol>
+<p>The frameworks that address these problems also bring their own graph DSL, state model, and
+dependency footprint. Many teams want the controls without adopting a framework.</p>
+<h2>Users and jobs-to-be-done</h2>
+<table>
+<thead>
+<tr>
+<th>User</th>
+<th>Job</th>
+<th>What they need from this repo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AI product engineer shipping one agent</td>
+<td>"Get my agent safe enough to put in front of customers."</td>
+<td>Typed tools, approvals on writes, budgets, structured output that validates</td>
+</tr>
+<tr>
+<td>Platform / infra engineer</td>
+<td>"Give every product team the same guardrails and telemetry without reviewing each agent by hand."</td>
+<td>One runtime contract, spans in OpenTelemetry, a guardrail interface teams extend</td>
+</tr>
+<tr>
+<td>AI PM / tech lead</td>
+<td>"Know whether the agent got better or worse after a prompt or model change, and what it costs per task."</td>
+<td>Scenario evals in CI with pass rate, mean steps, cost per task, guardrail triggers</td>
+</tr>
+<tr>
+<td>Trust and safety / risk reviewer</td>
+<td>"Show me what stops the agent from doing X."</td>
+<td>Forbidden-action scenarios, the guardrail bench, trace evidence for each decision</td>
+</tr>
+</tbody>
+</table>
+<h2>Scope</h2>
+<p><strong>In:</strong></p>
+<ul>
+<li>A synchronous agent loop with step, token, cost, and wall-clock limits.</li>
+<li>Retry with backoff on transient provider errors.</li>
+<li>Structured final answers with pydantic validation and one repair attempt.</li>
+<li>Tool registry: schemas from type hints, argument validation, timeouts, read/write
+  classification, idempotency, and a human-approval hook.</li>
+<li>Guardrails at four stages (input, tool call, tool output, final output) plus budgets, all
+  returning typed decisions.</li>
+<li>Tracing: a span model, a JSONL exporter, an OpenTelemetry exporter, and a terminal tree view.</li>
+<li>Provider adapters: Anthropic Messages, OpenAI Chat Completions, OpenAI Responses, and a
+  deterministic mock.</li>
+<li>YAML scenario evals and a guardrail precision/recall bench, all runnable in CI without keys.</li>
+<li>Two reference agents on synthetic data.</li>
+</ul>
+<p><strong>Out (deliberately):</strong></p>
+<ul>
+<li>Multi-agent orchestration, graph or state-machine DSLs, memory stores, vector databases.</li>
+<li>Hosted UI or trace storage. We export to OTel and let teams use the backend they already run.</li>
+<li>ML-based classifiers for injection or PII. The <code>Guardrail</code> interface is the extension point
+  for them.</li>
+<li>Streaming and async execution, which are on the roadmap below.</li>
+</ul>
+<h2>Requirements</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Requirement</th>
+<th>How it is met</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>A run must stop at its step, token, cost, or time limit, and say which one</td>
+<td><code>BudgetTracker</code> checks before every step and before executing tools. Each limit maps to a distinct <code>RunStatus</code> and a <code>budget</code> decision span</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Transient provider failures are retried without hiding them</td>
+<td>The runtime owns retries (SDK <code>max_retries=0</code>). Each attempt is its own span, and backoff has jitter and respects the deadline</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>Write tools never run without an approval verdict</td>
+<td>Default approver denies. The verdict and reviewer are recorded on the tool span</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>A non-idempotent write never runs twice in a run</td>
+<td>Calls are keyed on canonicalised arguments and recorded before execution, so a crashed write cannot be repeated</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>Untrusted text is screened at every boundary</td>
+<td><code>GuardrailSet</code> runs at input, tool call, tool output, and output. Redactions chain, and the first block wins</td>
+</tr>
+<tr>
+<td>R6</td>
+<td>Every guardrail outcome is auditable</td>
+<td>Each <code>Decision</code> becomes a <code>guardrail</code> span with stage, action, reason, and findings</td>
+</tr>
+<tr>
+<td>R7</td>
+<td>Final answers conform to a schema or the run says so</td>
+<td>Pydantic validation, one repair prompt with the errors, then <code>invalid_output</code></td>
+</tr>
+<tr>
+<td>R8</td>
+<td>Everything runs without API keys</td>
+<td><code>MockProvider</code> is the default for the CLI, tests, and CI</td>
+</tr>
+<tr>
+<td>R9</td>
+<td>Behaviour changes are caught before merge</td>
+<td><code>agent eval scenarios/</code> exits non-zero below <code>--min-pass-rate</code>. CI runs it on every push</td>
+</tr>
+</tbody>
+</table>
+<h2>Success metrics and evals</h2>
+<p>These are the metrics the repo measures about itself. Current values are from the bundled
+synthetic data with the mock provider and simulated pricing ($3 / $15 per Mtok).</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Definition</th>
+<th>How measured</th>
+<th>Current</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Task success rate</td>
+<td>Scenarios meeting every expectation (outcome, tool sequence, forbidden actions, limits)</td>
+<td><code>agent eval scenarios/</code></td>
+<td>19/19 (100%)</td>
+</tr>
+<tr>
+<td>Unsafe outcomes prevented</td>
+<td>Ablation: scenarios with a safety violation (a forbidden tool executed or a forbidden pattern in the answer), content guardrails off vs on</td>
+<td><code>agent eval scenarios/ --no-guardrails</code> (<code>unsafe</code> in the summary)</td>
+<td>2 off vs 0 on (unauthorised refund, relayed phishing); 15/19 pass overall without guardrails</td>
+</tr>
+<tr>
+<td>Guardrail precision</td>
+<td>TP / (TP + FP) per check on labelled cases</td>
+<td><code>agent guardrails bench</code></td>
+<td>Injection 1.000, PII 1.000 (in-sample)</td>
+</tr>
+<tr>
+<td>Guardrail recall</td>
+<td>TP / (TP + FN)</td>
+<td>same</td>
+<td>Injection 0.733 (11/15), PII 1.000</td>
+</tr>
+<tr>
+<td>Cost per task</td>
+<td>Mean <code>cost_usd</code> per scenario</td>
+<td>eval report</td>
+<td>$0.0055 (simulated)</td>
+</tr>
+<tr>
+<td>Mean steps</td>
+<td>Mean model turns per scenario</td>
+<td>eval report</td>
+<td>2.89</td>
+</tr>
+</tbody>
+</table>
+<p>How to read these numbers:</p>
+<ul>
+<li><strong>Mock-mode success rate checks the runtime, not the model.</strong> A 100% pass rate shows that the
+  loop, guardrails, approvals, and budgets behave as specified against a model that does what the
+  policy scripts. The same suite runs against a real model with <code>--provider anthropic|openai</code> and a
+  <code>--min-pass-rate</code> threshold. That number is the model-quality metric, and it has not been
+  measured here.</li>
+<li><strong>Guardrail precision is the metric to protect.</strong> A false positive withholds a legitimate tool
+  output or blocks a valid answer, and users experience that as the agent being broken. Recall gaps
+  are covered by the other layers (allowlist, approval, policy check, output policy). The bench test
+  in CI fails on any new false positive.</li>
+<li><strong>The bench is in-sample.</strong> The rules were tuned on these 48 cases. A held-out set, and labelled
+  traffic from real deployments, are needed before quoting recall as a capability.</li>
+</ul>
+<p>Guardrail metrics we intend to track once real traffic exists: trigger rate per 1k runs by stage,
+approval denial rate per write tool, share of runs ending in a non-<code>completed</code> status, and p95 cost
+per task.</p>
+<h2>Minimum viable quality</h2>
+<p>Thresholds for releasing a change to the runtime, the guardrails, or an agent built on it. The
+mock-provider rows are enforced in CI today; the real-model rows are targets, because no real-model
+run has been measured yet (issue #7).</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Do not ship</th>
+<th>Ship</th>
+<th>Delight</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scenario pass rate, mock provider</td>
+<td>below 19/19</td>
+<td>19/19 (the CI gate, <code>--min-pass-rate 1.0</code>)</td>
+<td>19/19 on a larger suite that includes the four bench misses as scenarios</td>
+</tr>
+<tr>
+<td>Unsafe scenarios (forbidden tool executed or forbidden pattern in the answer)</td>
+<td>1 or more</td>
+<td>0</td>
+<td>0, with a scenario added for each injection class the bench misses today</td>
+</tr>
+<tr>
+<td>Guardrail precision (bench)</td>
+<td>any new false positive (below 1.000)</td>
+<td>1.000</td>
+<td>1.000 on a held-out set as well</td>
+</tr>
+<tr>
+<td>Injection recall (bench)</td>
+<td>below 0.733 (a regression)</td>
+<td>0.733 or higher, in-sample</td>
+<td>0.90 or higher on a held-out set</td>
+</tr>
+<tr>
+<td>Scenario pass rate, real model</td>
+<td>below 0.9</td>
+<td>0.9 or higher (the threshold used in the README example)</td>
+<td>0.95 or higher with 0 unsafe</td>
+</tr>
+<tr>
+<td>Cost per run</td>
+<td>any scenario over its budget, or a mean above the example agents' $0.05 cap</td>
+<td>within budget; mean near today's $0.0055 (simulated)</td>
+<td>mean cost flat or lower after a change that raises pass rate</td>
+</tr>
+</tbody>
+</table>
+<h2>Cost at 1x and 10x usage</h2>
+<p>Estimates only, built from the repo's own assumptions: simulated pricing of $3 / $15 per million
+input / output tokens (<code>providers/pricing.py</code>), mock token counts of about 4 characters per token,
+the measured mean of $0.0055 per run ($5.49 per 1k runs) on the bundled scenarios, and the example
+agents' $0.05 per-run cost cap. The repo defines no traffic level, so 1x is set at 1,000 runs a day
+for illustration.</p>
+<table>
+<thead>
+<tr>
+<th>Usage</th>
+<th>Runs per day</th>
+<th>Expected (mean $0.0055 per run)</th>
+<th>Ceiling (every run hits the $0.05 cap)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1x</td>
+<td>1,000</td>
+<td>about $5.49 a day, about $165 per 30 days</td>
+<td>$50 a day, $1,500 per 30 days</td>
+</tr>
+<tr>
+<td>10x</td>
+<td>10,000</td>
+<td>about $54.88 a day, about $1,646 per 30 days</td>
+<td>$500 a day, $15,000 per 30 days</td>
+</tr>
+</tbody>
+</table>
+<p>What the estimate leaves out: real token counts (the mock's are estimates), current vendor prices,
+and the cost of whatever OpenTelemetry backend stores the spans. Guardrails run locally and add no
+per-call cost. Nothing in the harness caches or batches, so model cost scales linearly with runs;
+the budget cap is what bounds the tail, which is why the ceiling column is worth reading next to the
+expected one.</p>
+<h2>Trade-offs and alternatives considered</h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Why not (for this scope)</th>
+<th>What we gave up</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph / LangChain agents</strong></td>
+<td>They are strong for complex graphs with checkpointing. But they bring a large dependency surface and a state model of their own, and guardrails and budgets are add-ons rather than core loop semantics.</td>
+<td>Graph composition, persistence, human-in-the-loop resume, a large integration catalogue</td>
+</tr>
+<tr>
+<td><strong>OpenAI Agents SDK / vendor SDKs</strong></td>
+<td>Good ergonomics, but tied to one vendor's API shapes. We need the same guardrail and eval contract across Anthropic and OpenAI.</td>
+<td>Built-in hosted tools and handoffs</td>
+</tr>
+<tr>
+<td><strong>Guardrails-as-a-service (classifier APIs)</strong></td>
+<td>Add a network hop and a vendor to every boundary, and cannot run in keyless CI.</td>
+<td>Higher recall on semantic injections</td>
+</tr>
+<tr>
+<td><strong>Exceptions instead of decisions</strong></td>
+<td>Raising on a violation is simpler, but it loses the ability to redact-and-continue and to count triggers.</td>
+<td>A little code simplicity</td>
+</tr>
+<tr>
+<td><strong>Async-first loop</strong></td>
+<td>Most agent workloads are latency-bound on the model, not on concurrency within a single run. Sync keeps the core easy to read and to test deterministically.</td>
+<td>Parallel tool execution within a turn, native streaming</td>
+</tr>
+</tbody>
+</table>
+<p>The bet is that about 800 lines of core runtime with strict contracts are easier to audit,
+extend, and trust than a framework, for teams whose agents are a loop over a handful of tools.
+When that stops being true (long-running workflows, branching, resumable state), LangGraph is the
+better choice. The span model and scenario format here are meant to carry over if a team switches.</p>
+<h2>Risks</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Heuristic injection detection gives false confidence</td>
+<td>High</td>
+<td>High</td>
+<td>Documented recall, in-sample label, layered controls. Write tools fail closed regardless</td>
+</tr>
+<tr>
+<td>Mock-mode green CI hides real-model regressions</td>
+<td>Medium</td>
+<td>High</td>
+<td>Same scenarios run against real providers with a pass-rate gate. Recommend a nightly job with keys</td>
+</tr>
+<tr>
+<td>Static pricing table drifts from vendor prices</td>
+<td>High</td>
+<td>Medium</td>
+<td>Prices live in one module with per-provider override. Unknown models are priced at $0 and flagged in docs</td>
+</tr>
+<tr>
+<td>Abandoned tool threads after a timeout keep running side effects</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Writes are not retried after timeout, and records mark <code>executed</code>. Docs require tools to enforce their own I/O timeouts</td>
+</tr>
+<tr>
+<td>Approval fatigue leads reviewers to rubber-stamp</td>
+<td>Medium</td>
+<td>High</td>
+<td>Approval requests carry canonical arguments. The roadmap adds policy-based auto-approval for low-risk writes, so humans see fewer, higher-stakes requests</td>
+</tr>
+<tr>
+<td>PII redaction misses categories (names, addresses)</td>
+<td>High</td>
+<td>Medium</td>
+<td>Scope stated plainly. The <code>Guardrail</code> interface accepts an NER-based redactor</td>
+</tr>
+</tbody>
+</table>
+<h2>Roadmap</h2>
+<p><strong>Now (this repo)</strong></p>
+<ul>
+<li>Core loop, budgets, retries, structured output repair.</li>
+<li>Tool registry with approval and idempotency semantics.</li>
+<li>Four-stage guardrails, synthetic bench, JSONL and OTel tracing, tree renderer.</li>
+<li>Anthropic and OpenAI adapters, mock provider, 19 scenarios gating CI.</li>
+<li>Charts and a GitHub Pages site rebuilt from live eval runs on every push to main.</li>
+</ul>
+<p><strong>Next</strong></p>
+<ul>
+<li>Held-out guardrail set, plus a pluggable classifier guardrail (for example, a small local model)
+  with the bench comparing it against the heuristics.</li>
+<li>Policy-based approval: rules such as "auto-approve refunds under $50 on eligible orders", with
+  every auto-approval traced.</li>
+<li>Nightly real-provider eval job with per-model pass-rate, cost, and step trends.</li>
+<li>Async loop with concurrent tool execution within a turn, and streaming of final answers.</li>
+</ul>
+<p><strong>Later</strong></p>
+<ul>
+<li>Resumable runs: persist <code>RunResult</code> messages so a denied approval can be retried after review
+  without replaying earlier steps.</li>
+<li>Scenario generation from production traces: turn a failing trace into a regression scenario with
+  one command.</li>
+<li>Cost and step SLOs per agent, with alerts driven by exported spans.</li>
+</ul>
+</article>
+  </main>
+  <footer class="wrap footer">
+    <p>agent-harness v0.1.0 &middot; MIT License &middot; Sean McRae &middot;
+      <a href="https://github.com/seanmcrae/agent-harness">source</a> &middot;
+      <a href="results.json">raw results (JSON)</a></p>
+    <p>All numbers and traces on this site were produced by <code>make site</code> on the bundled
+      synthetic data with the offline mock provider.</p>
+  </footer>
+</body>
+</html>
